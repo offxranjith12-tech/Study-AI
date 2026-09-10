@@ -11,9 +11,11 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
 export default function TutorChatPage() {
-  const { messages, append, isLoading } = useChat()
+  const { messages, sendMessage, status } = useChat()
   const [inputValue, setInputValue] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  const isLoading = status === 'submitted' || status === 'streaming'
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -27,7 +29,7 @@ export default function TutorChatPage() {
     e.preventDefault()
     if (!inputValue.trim() || isLoading) return;
     
-    append({ role: 'user', content: inputValue })
+    sendMessage({ role: 'user', content: inputValue })
     setInputValue('')
   }
 
