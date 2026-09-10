@@ -29,6 +29,21 @@ export async function POST(req: Request) {
     // We'll generate a plan for the next 7 days or until exam, whichever is shorter
     const daysToGenerate = Math.min(7, diffDays);
 
+    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+      // DEMO MODE: Return mock data after a short delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      const mockPlan = Array.from({ length: daysToGenerate }).map((_, i) => ({
+        day: i + 1,
+        tasks: subjects.map((sub: string) => ({
+          subject: sub,
+          topic: `Core concepts of ${sub}`,
+          durationMinutes: Math.floor((hoursPerDay * 60) / subjects.length),
+          activityType: "Reading & Practice"
+        }))
+      }));
+      return NextResponse.json({ plan: mockPlan });
+    }
+
     const { object } = await generateObject({
       model: google('gemini-1.5-pro'),
       schema: z.object({

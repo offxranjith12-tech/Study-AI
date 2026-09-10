@@ -36,6 +36,11 @@ export async function POST(req: Request) {
 
     // If it's a user message, check if we need to retrieve context
     if (lastMessage && lastMessage.role === 'user') {
+      if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+        // DEMO MODE: Return a fake response
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return new Response("Demo Mode: I am a fake AI Tutor. Your API key is missing. Here is a simulated response to your message: '" + lastMessage.content + "'");
+      }
       try {
         // Generate embedding for the user's query
         const { embedding } = await embed({

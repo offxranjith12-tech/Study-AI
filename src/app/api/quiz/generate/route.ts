@@ -21,6 +21,23 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
+    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+      // DEMO MODE: Return mock data after a short delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      const mockQuiz = Array.from({ length: numQuestions }).map((_, i) => ({
+        question: `Demo Question ${i + 1} about ${topic} (${difficulty})`,
+        options: [
+          `Incorrect option A for ${topic}`,
+          `Correct answer for ${topic}`,
+          `Incorrect option C for ${topic}`,
+          `Incorrect option D for ${topic}`
+        ],
+        correctAnswer: 1,
+        explanation: `This is a demo explanation. The correct answer is option B because it is the generated mock answer for ${topic}.`
+      }));
+      return NextResponse.json({ quiz: mockQuiz });
+    }
+
     const { object } = await generateObject({
       model: google('gemini-1.5-pro'),
       schema: z.object({
