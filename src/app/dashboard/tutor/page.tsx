@@ -6,12 +6,13 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Send, User, Bot, BrainCircuit } from 'lucide-react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
 export default function TutorChatPage() {
-  const { messages, input, setInput, handleSubmit, isLoading } = useChat()
+  const { messages, append, isLoading } = useChat()
+  const [inputValue, setInputValue] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
@@ -21,6 +22,14 @@ export default function TutorChatPage() {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!inputValue.trim() || isLoading) return;
+    
+    append({ role: 'user', content: inputValue })
+    setInputValue('')
+  }
 
   return (
     <div className="flex flex-col h-full space-y-4">
@@ -84,15 +93,15 @@ export default function TutorChatPage() {
         </ScrollArea>
         
         <CardFooter className="p-4 border-t bg-muted/10">
-          <form onSubmit={handleSubmit} className="flex w-full space-x-2">
+          <form onSubmit={onSubmit} className="flex w-full space-x-2">
             <input 
-              value={input || ''}
-              onChange={(e) => setInput(e.target.value)}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
               placeholder="E.g., What is polymorphism in Java?" 
               className="flex-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isLoading}
             />
-            <Button type="submit" disabled={isLoading || !input?.trim()}>
+            <Button type="submit" disabled={isLoading || !inputValue.trim()}>
               <Send className="h-4 w-4 mr-2" />
               Send
             </Button>
